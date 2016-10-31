@@ -1,3 +1,4 @@
+# Adapted by Christian Zeller
 # base-image for node on any machine using a template variable,
 # see more about dockerfile templates here: http://docs.resin.io/deployment/docker-templates/
 # and about resin base images here: http://docs.resin.io/runtime/resin-base-images/
@@ -5,16 +6,19 @@
 FROM resin/%%RESIN_MACHINE_NAME%%-node:slim
 
 # use apt-get if you need to install dependencies,
-# for instance if you need ALSA sound utils, just uncomment the lines below.
 #RUN apt-get update && apt-get install -yq \
-#    alsa-utils libasound2-dev && \
+#    <<PACKET>> && \
 #    apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN npm i -g npm@2.x
+RUN setcap cap_net_raw+eip $(eval readlink -f `which node`)
+
+	
 # Defines our working directory in container
 WORKDIR /usr/src/app
 
 # Copies the package.json first for better cache on later pushes
-COPY package.json package.json
+#COPY package.json package.json
 
 # This install npm dependencies on the resin.io build server,
 # making sure to clean up the artifacts it creates in order to reduce the image size.
